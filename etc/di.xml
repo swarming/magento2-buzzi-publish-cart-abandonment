@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Swarming Technology, LLC. All rights reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Buzzi\PublishCartAbandonment\Api\CartAbandonmentIndexerInterface" type="Buzzi\PublishCartAbandonment\Service\CartAbandonmentIndexer" />
+    <preference for="Buzzi\PublishCartAbandonment\Api\CartAbandonmentManagerInterface" type="Buzzi\PublishCartAbandonment\Service\CartAbandonmentManager" />
+    <preference for="Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface" type="Buzzi\PublishCartAbandonment\Service\CartAbandonmentRepository" />
+    <preference for="Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface" type="Buzzi\PublishCartAbandonment\Model\CartAbandonment" />
+</config>

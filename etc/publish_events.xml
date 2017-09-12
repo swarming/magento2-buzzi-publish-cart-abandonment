@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Swarming Technology, LLC. All rights reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Buzzi_Publish:etc/publish_events.xsd">
+    <buzzi>
+        <publish_event code="cart_abandonment" cron_only="1">
+            <label>Cart Abandonment</label>
+            <type>buzzi.ecommerce.cart-abandonment</type>
+            <cron_model>Buzzi\PublishCartAbandonment\Cron\Submit::execute</cron_model>
+        </publish_event>
+    </buzzi>
+</config>

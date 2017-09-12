@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Swarming Technology, LLC. All rights reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <buzzi_publish_events>
+            <cart_abandonment>
+                <quote_last_action>1</quote_last_action>
+                <global_schedule>1</global_schedule>
+            </cart_abandonment>
+        </buzzi_publish_events>
+    </default>
+</config>

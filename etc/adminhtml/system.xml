@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Swarming Technology, LLC. All rights reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="buzzi_publish_events">
+            <group id="cart_abandonment">
+                <field id="quote_last_action" translate="label comment" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Quote Last Action Timing</label>
+                    <comment>The number of days, when a quote was updated last time.</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
