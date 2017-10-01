@@ -22,6 +22,7 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
     {
         if (version_compare($context->getVersion(), '2.0.0', '<')) {
             $this->addErrorMessageField($setup);
+            $this->addCreatedAtField($setup);
         }
     }
 
@@ -38,6 +39,24 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
                 'type' => Table::TYPE_TEXT,
                 'nullable' => true,
                 'comment' => 'Error Message'
+            ]
+        );
+    }
+
+    /**
+     * @param \Magento\Framework\Setup\SchemaSetupInterface $setup
+     * @return void
+     */
+    protected function addCreatedAtField(SchemaSetupInterface $setup)
+    {
+        $setup->getConnection()->addColumn(
+            $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
+            CartAbandonmentInterface::CREATED_AT,
+            [
+                'type' => Table::TYPE_TIMESTAMP,
+                'nullable' => false,
+                'default' => Table::TIMESTAMP_INIT,
+                'comment' => 'Created At'
             ]
         );
     }

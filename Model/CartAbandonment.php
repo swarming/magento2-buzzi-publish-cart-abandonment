@@ -118,4 +118,21 @@ class CartAbandonment extends \Magento\Framework\Model\AbstractExtensibleModel
     {
         return $this->_getData(self::ERROR_MESSAGE);
     }
+
+    /**
+     * @param string $createdAt
+     * @return $this
+     */
+    public function setCreatedAt($createdAt)
+    {
+        return $this->setData(self::CREATED_AT, $createdAt);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCreatedAt()
+    {
+        return $this->_getData(self::CREATED_AT);
+    }
 }

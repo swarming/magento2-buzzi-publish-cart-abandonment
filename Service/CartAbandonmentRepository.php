@@ -52,7 +52,7 @@ class CartAbandonmentRepository implements \Buzzi\PublishCartAbandonment\Api\Car
     {
         $cartAbandonment = $this->getNew();
         $this->cartAbandonmentResource->load($cartAbandonment, $entityId);
-        if (!$donNotCheck && !$cartAbandonment->getEntityId()) {
+        if (!$donNotCheck && !$cartAbandonment->getAbandonmentId()) {
             throw new NoSuchEntityException(__('CartAbandonment with id "%1" does not exist.', $cartAbandonment));
         }
         return $cartAbandonment;
@@ -68,7 +68,7 @@ class CartAbandonmentRepository implements \Buzzi\PublishCartAbandonment\Api\Car
     {
         $cartAbandonment = $this->getNew();
         $this->cartAbandonmentResource->load($cartAbandonment, $quoteId, CartAbandonmentInterface::QUOTE_ID);
-        if (!$donNotCheck && !$cartAbandonment->getEntityId()) {
+        if (!$donNotCheck && !$cartAbandonment->getAbandonmentId()) {
             throw new NoSuchEntityException(__('CartAbandonment for quote_id "%1" does not exist.', $cartAbandonment));
         }
         return $cartAbandonment;

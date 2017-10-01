@@ -4,6 +4,8 @@
  */
 namespace Buzzi\PublishCartAbandonment\Service;
 
+use Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface;
+
 class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAbandonmentIndexerInterface
 {
     /**
@@ -49,9 +51,15 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
         /** @var \Magento\Quote\Model\Quote $quote */
         foreach ($quoteCollection as $quote) {
             $cartAbandonment = $this->cartAbandonmentRepository->getByQuoteId($quote->getId(), true);
+            if ($cartAbandonment->getAbandonmentId() && $cartAbandonment->getCreatedAt() > $quote->getUpdatedAt()) {
+                continue;
+            }
             $cartAbandonment->setStoreId($quote->getStoreId());
             $cartAbandonment->setQuoteId($quote->getId());
             $cartAbandonment->setCustomerId($quote->getCustomerId());
+            $cartAbandonment->setStatus(CartAbandonmentInterface::STATUS_PENDING);
+            $cartAbandonment->setErrorMessage('');
+            $cartAbandonment->setCreatedAt($quoteCollection->getConnection()->formatDate(true));
             $this->cartAbandonmentRepository->save($cartAbandonment);
         }
     }
@@ -67,7 +75,10 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
         $quoteCollection->prepareForAbandonedReport(null);
         $quoteCollection->addFieldToFilter(
             ['main_table.updated_at', 'main_table.updated_at'],
-            [['gteq' => new \Zend_Db_Expr(sprintf('DATE_SUB(NOW(), INTERVAL %d DAY)', $quoteLastActionDays))], ['eq' => '0000-00-00 00:00:00']]
+            [
+                ['gteq' => new \Zend_Db_Expr(sprintf('DATE_SUB(NOW(), INTERVAL %d DAY)', $quoteLastActionDays))],
+                ['eq' => '0000-00-00 00:00:00']
+            ]
         );
         if ($storeId) {
             $quoteCollection->addFieldToFilter('main_table.store_id', ['eq' => $storeId]);

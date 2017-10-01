@@ -16,6 +16,7 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
     const CUSTOMER_ID = 'customer_id';
     const STATUS = 'status';
     const ERROR_MESSAGE = 'error_message';
+    const CREATED_AT = 'created_at';
 
     /**
      * @param int $abandonmentId
@@ -82,4 +83,15 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
      * @return string|null
      */
     public function getErrorMessage();
+
+    /**
+     * @param string $createdAt
+     * @return $this
+     */
+    public function setCreatedAt($createdAt);
+
+    /**
+     * @return string|null
+     */
+    public function getCreatedAt();
 }
