@@ -20,7 +20,7 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
 
     /**
      * @param int $abandonmentId
-     * @return $this
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
      */
     public function setAbandonmentId($abandonmentId);
 
@@ -31,7 +31,7 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
 
     /**
      * @param int $storeId
-     * @return $this
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
      */
     public function setStoreId($storeId);
 
@@ -42,7 +42,7 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
 
     /**
      * @param int $quoteId
-     * @return $this
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
      */
     public function setQuoteId($quoteId);
 
@@ -53,7 +53,7 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
 
     /**
      * @param int $customerId
-     * @return $this
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
      */
     public function setCustomerId($customerId);
 
@@ -64,7 +64,7 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
 
     /**
      * @param int $status
-     * @return $this
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
      */
     public function setStatus($status);
 
@@ -75,7 +75,7 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
 
     /**
      * @param string $errorMessage
-     * @return $this
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
      */
     public function setErrorMessage($errorMessage);
 
@@ -86,7 +86,7 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
 
     /**
      * @param string $createdAt
-     * @return $this
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
      */
     public function setCreatedAt($createdAt);
 

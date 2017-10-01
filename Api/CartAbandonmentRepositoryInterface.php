@@ -9,7 +9,7 @@ use Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface;
 interface CartAbandonmentRepositoryInterface
 {
     /**
-     * @param array $data
+     * @param string[] $data
      * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
      */
     public function getNew(array $data = []);
