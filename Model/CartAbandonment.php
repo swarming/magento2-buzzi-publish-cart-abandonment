@@ -101,4 +101,21 @@ class CartAbandonment extends \Magento\Framework\Model\AbstractExtensibleModel
     {
         return $this->_getData(self::STATUS);
     }
+
+    /**
+     * @param string $errorMessage
+     * @return $this
+     */
+    public function setErrorMessage($errorMessage)
+    {
+        return $this->setData(self::ERROR_MESSAGE, $errorMessage);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getErrorMessage()
+    {
+        return $this->_getData(self::ERROR_MESSAGE);
+    }
 }

@@ -8,12 +8,14 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
 {
     const STATUS_PENDING = 'pending';
     const STATUS_DONE = 'done';
+    const STATUS_FAIL = 'fail';
 
     const ABANDONMENT_ID = 'abandonment_id';
     const STORE_ID = 'store_id';
     const QUOTE_ID  = 'quote_id';
     const CUSTOMER_ID = 'customer_id';
     const STATUS = 'status';
+    const ERROR_MESSAGE = 'error_message';
 
     /**
      * @param int $abandonmentId
@@ -69,4 +71,15 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
      * @return int|null
      */
     public function getStatus();
+
+    /**
+     * @param string $errorMessage
+     * @return $this
+     */
+    public function setErrorMessage($errorMessage);
+
+    /**
+     * @return string|null
+     */
+    public function getErrorMessage();
 }

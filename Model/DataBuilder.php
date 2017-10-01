@@ -79,7 +79,7 @@ class DataBuilder
      */
     public function getPayload(CartAbandonmentInterface $cartAbandonment)
     {
-        $quote = $this->cartRepository->get($cartAbandonment->getQuoteId());
+        $quote = $this->cartRepository->getActive($cartAbandonment->getQuoteId());
 
         $payload = $this->dataBuilderBase->initBaseData(self::EVENT_TYPE);
         $payload['customer'] = $this->getCustomerData($quote);

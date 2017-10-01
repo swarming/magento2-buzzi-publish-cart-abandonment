@@ -62,8 +62,6 @@ class CartAbandonmentManager implements \Buzzi\PublishCartAbandonment\Api\CartAb
         /** @var \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface $cartAbandonment */
         foreach ($cartAbandonmentCollection as $cartAbandonment) {
             $this->send($cartAbandonment);
-            $cartAbandonment->setStatus(CartAbandonmentInterface::STATUS_DONE);
-            $this->cartAbandonmentRepository->save($cartAbandonment);
         }
     }
 
@@ -76,8 +74,11 @@ class CartAbandonmentManager implements \Buzzi\PublishCartAbandonment\Api\CartAb
         try {
             $payload = $this->dataBuilder->getPayload($cartAbandonment);
             $this->queue->send(DataBuilder::EVENT_TYPE, $payload, $cartAbandonment->getStoreId());
+            $cartAbandonment->setStatus(CartAbandonmentInterface::STATUS_DONE);
         } catch (\Exception $e) {
-            // Do nothing
+            $cartAbandonment->setStatus(CartAbandonmentInterface::STATUS_FAIL);
+            $cartAbandonment->setErrorMessage($e->getMessage());
         }
+        $this->cartAbandonmentRepository->save($cartAbandonment);
     }
 }
