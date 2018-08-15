@@ -4,38 +4,49 @@
  */
 namespace Buzzi\PublishCartAbandonment\Service;
 
+use Magento\Framework\App\ObjectManager;
 use Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface;
+use Magento\Customer\Model\Customer;
+use Buzzi\Publish\Helper\Customer as CustomerHelper;
 
 class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAbandonmentIndexerInterface
 {
     /**
      * @var \Magento\Customer\Model\Visitor
      */
-    protected $visitorModel;
+    private $visitorModel;
 
     /**
      * @var \Magento\Reports\Model\ResourceModel\Quote\CollectionFactory
      */
-    protected $quoteCollectionFactory;
+    private $quoteCollectionFactory;
 
     /**
      * @var \Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface
      */
-    protected $cartAbandonmentRepository;
+    private $cartAbandonmentRepository;
+
+    /**
+     * @var \Magento\Eav\Model\Config
+     */
+    private $eavConfig;
 
     /**
      * @param \Magento\Customer\Model\Visitor $visitorModel
      * @param \Magento\Reports\Model\ResourceModel\Quote\CollectionFactory $quoteCollectionFactory
      * @param \Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface $cartAbandonmentRepository
+     * @param \Magento\Eav\Model\Config|null $eavConfig
      */
     public function __construct(
         \Magento\Customer\Model\Visitor $visitorModel,
         \Magento\Reports\Model\ResourceModel\Quote\CollectionFactory $quoteCollectionFactory,
-        \Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface $cartAbandonmentRepository
+        \Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface $cartAbandonmentRepository,
+        \Magento\Eav\Model\Config $eavConfig = null
     ) {
         $this->visitorModel = $visitorModel;
         $this->quoteCollectionFactory = $quoteCollectionFactory;
         $this->cartAbandonmentRepository = $cartAbandonmentRepository;
+        $this->eavConfig = $eavConfig ?: ObjectManager::getInstance()->get(\Magento\Eav\Model\Config::class);
     }
 
     /**
@@ -70,7 +81,7 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
      * @param int|null $storeId
      * @return void
      */
-    protected function prepareFilters($quoteCollection, $quoteLastActionDays, $storeId = null)
+    private function prepareFilters($quoteCollection, $quoteLastActionDays, $storeId = null)
     {
         $quoteCollection->prepareForAbandonedReport(null);
         $quoteCollection->addFieldToFilter(
@@ -84,13 +95,14 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
             $quoteCollection->addFieldToFilter('main_table.store_id', ['eq' => $storeId]);
         }
         $this->filterOnlineCustomers($quoteCollection);
+        $this->filterNotAllowedCustomers($quoteCollection);
     }
 
     /**
      * @param \Magento\Reports\Model\ResourceModel\Quote\Collection $quoteCollection
      * @return void
      */
-    protected function filterOnlineCustomers($quoteCollection)
+    private function filterOnlineCustomers($quoteCollection)
     {
         $quoteCollection->getSelect()
             ->joinInner(
@@ -100,5 +112,23 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
             )
             ->group('main_table.customer_id')
             ->having('last_action < DATE_SUB(NOW(), INTERVAL ? MINUTE)', $this->visitorModel->getOnlineInterval());
+    }
+    /**
+     * @param \Magento\Reports\Model\ResourceModel\Quote\Collection $quoteCollection
+     * @return void
+     */
+    private function filterNotAllowedCustomers($quoteCollection)
+    {
+        $attribute = $this->eavConfig->getAttribute(Customer::ENTITY, CustomerHelper::ATTR_EXCEPTS_MARKETING);
+
+        $quoteCollection->getSelect()->joinLeft(
+            'customer_entity_int',
+            sprintf(
+                'customer_entity_int.entity_id=main_table.customer_id and customer_entity_int.attribute_id=%d',
+                $attribute->getId()
+            ),
+            []
+        );
+        $quoteCollection->getSelect()->where('customer_entity_int.value', '1');
     }
 }
