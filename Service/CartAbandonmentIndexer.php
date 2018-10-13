@@ -4,10 +4,9 @@
  */
 namespace Buzzi\PublishCartAbandonment\Service;
 
-use Magento\Framework\App\ObjectManager;
 use Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface;
 use Magento\Customer\Model\Customer;
-use Buzzi\Publish\Helper\Customer as CustomerHelper;
+use Buzzi\Publish\Helper\ExceptsMarketing;
 
 class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAbandonmentIndexerInterface
 {
@@ -41,23 +40,24 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
         \Magento\Customer\Model\Visitor $visitorModel,
         \Magento\Reports\Model\ResourceModel\Quote\CollectionFactory $quoteCollectionFactory,
         \Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface $cartAbandonmentRepository,
-        \Magento\Eav\Model\Config $eavConfig = null
+        \Magento\Eav\Model\Config $eavConfig
     ) {
         $this->visitorModel = $visitorModel;
         $this->quoteCollectionFactory = $quoteCollectionFactory;
         $this->cartAbandonmentRepository = $cartAbandonmentRepository;
-        $this->eavConfig = $eavConfig ?: ObjectManager::getInstance()->get(\Magento\Eav\Model\Config::class);
+        $this->eavConfig = $eavConfig;
     }
 
     /**
      * @param int $quoteLastActionDays
+     * @param bool $isRespectAcceptsMarketing
      * @param int|null $storeId
      * @return void
      */
-    public function reindex($quoteLastActionDays = 1, $storeId = null)
+    public function reindex($quoteLastActionDays = 1, $isRespectAcceptsMarketing = false, $storeId = null)
     {
         $quoteCollection = $this->quoteCollectionFactory->create();
-        $this->prepareFilters($quoteCollection, $quoteLastActionDays, $storeId);
+        $this->prepareFilters($quoteCollection, $quoteLastActionDays, $isRespectAcceptsMarketing, $storeId);
 
         /** @var \Magento\Quote\Model\Quote $quote */
         foreach ($quoteCollection as $quote) {
@@ -78,10 +78,11 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
     /**
      * @param \Magento\Reports\Model\ResourceModel\Quote\Collection $quoteCollection
      * @param int $quoteLastActionDays
+     * @param bool $isRespectAcceptsMarketing
      * @param int|null $storeId
      * @return void
      */
-    private function prepareFilters($quoteCollection, $quoteLastActionDays, $storeId = null)
+    private function prepareFilters($quoteCollection, $quoteLastActionDays, $isRespectAcceptsMarketing = false, $storeId = null)
     {
         $quoteCollection->prepareForAbandonedReport(null);
         $quoteCollection->addFieldToFilter(
@@ -95,7 +96,10 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
             $quoteCollection->addFieldToFilter('main_table.store_id', ['eq' => $storeId]);
         }
         $this->filterOnlineCustomers($quoteCollection);
-        $this->filterNotAllowedCustomers($quoteCollection);
+
+        if ($isRespectAcceptsMarketing) {
+            $this->filterNotAllowedCustomers($quoteCollection);
+        }
     }
 
     /**
@@ -113,13 +117,14 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
             ->group('main_table.customer_id')
             ->having('last_action < DATE_SUB(NOW(), INTERVAL ? MINUTE)', $this->visitorModel->getOnlineInterval());
     }
+
     /**
      * @param \Magento\Reports\Model\ResourceModel\Quote\Collection $quoteCollection
      * @return void
      */
     private function filterNotAllowedCustomers($quoteCollection)
     {
-        $attribute = $this->eavConfig->getAttribute(Customer::ENTITY, CustomerHelper::ATTR_EXCEPTS_MARKETING);
+        $attribute = $this->eavConfig->getAttribute(Customer::ENTITY, ExceptsMarketing::CUSTOMER_ATTR);
 
         $quoteCollection->getSelect()->joinLeft(
             'customer_entity_int',

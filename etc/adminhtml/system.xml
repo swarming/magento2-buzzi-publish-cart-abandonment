@@ -8,7 +8,13 @@
     <system>
         <section id="buzzi_publish_events">
             <group id="cart_abandonment">
-                <field id="quote_last_action" translate="label comment" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                <field id="respect_accepts_marketing" translate="label comment" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Respect Accepts Marketing</label>
+                    <comment>If set to Yes, event data will only be sent for customers where the ‘Accepts Marketing’ attribute is set to Yes.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="quote_last_action" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
                     <label>Quote Last Action Timing</label>
                     <comment>The number of days, when a quote was updated last time.</comment>
                 </field>

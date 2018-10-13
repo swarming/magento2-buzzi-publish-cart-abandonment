@@ -59,6 +59,7 @@ class Submit
 
             $this->cartAbandonmentIndexer->reindex(
                 $this->configEvents->getValue(DataBuilder::EVENT_TYPE, 'quote_last_action', $storeId),
+                $this->configEvents->isSetFlag(DataBuilder::EVENT_TYPE, 'respect_accepts_marketing', $storeId),
                 $storeId
             );
 

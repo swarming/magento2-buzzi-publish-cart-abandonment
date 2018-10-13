@@ -8,6 +8,7 @@
     <default>
         <buzzi_publish_events>
             <cart_abandonment>
+                <respect_accepts_marketing>0</respect_accepts_marketing>
                 <quote_last_action>1</quote_last_action>
                 <global_schedule>1</global_schedule>
             </cart_abandonment>

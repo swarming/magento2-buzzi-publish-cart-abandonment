@@ -8,8 +8,9 @@ interface CartAbandonmentIndexerInterface
 {
     /**
      * @param int $quoteLastActionDays
+     * @param bool $isRespectAcceptsMarketing
      * @param int|null $storeId
      * @return void
      */
-    public function reindex($quoteLastActionDays = 1, $storeId = null);
+    public function reindex($quoteLastActionDays = 1, $isRespectAcceptsMarketing = false, $storeId = null);
 }
