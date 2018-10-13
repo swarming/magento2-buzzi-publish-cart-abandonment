@@ -6,7 +6,7 @@ namespace Buzzi\PublishCartAbandonment\Service;
 
 use Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface;
 use Magento\Customer\Model\Customer;
-use Buzzi\Publish\Helper\ExceptsMarketing;
+use Buzzi\Publish\Helper\AcceptsMarketing;
 
 class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAbandonmentIndexerInterface
 {
@@ -124,13 +124,13 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
      */
     private function filterNotAllowedCustomers($quoteCollection)
     {
-        $exceptsMarketingAttribute = $this->eavConfig->getAttribute(Customer::ENTITY, ExceptsMarketing::CUSTOMER_ATTR);
+        $acceptsMarketingAttribute = $this->eavConfig->getAttribute(Customer::ENTITY, AcceptsMarketing::CUSTOMER_ATTR);
 
         $quoteCollection->getSelect()->joinLeft(
             'customer_entity_int',
             sprintf(
                 'customer_entity_int.entity_id=main_table.customer_id and customer_entity_int.attribute_id=%d',
-                $exceptsMarketingAttribute->getId()
+                $acceptsMarketingAttribute->getId()
             ),
             []
         );
@@ -138,7 +138,7 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
         $fields = ['customer_entity_int.value'];
         $conditions = [['eq' => '1']];
 
-        if ($exceptsMarketingAttribute->getDefaultValue()) {
+        if ($acceptsMarketingAttribute->getDefaultValue()) {
             $fields[] = 'customer_entity_int.value';
             $conditions[] = ['null' => null];
         }
