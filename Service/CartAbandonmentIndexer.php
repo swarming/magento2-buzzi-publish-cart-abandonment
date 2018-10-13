@@ -124,16 +124,25 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
      */
     private function filterNotAllowedCustomers($quoteCollection)
     {
-        $attribute = $this->eavConfig->getAttribute(Customer::ENTITY, ExceptsMarketing::CUSTOMER_ATTR);
+        $exceptsMarketingAttribute = $this->eavConfig->getAttribute(Customer::ENTITY, ExceptsMarketing::CUSTOMER_ATTR);
 
         $quoteCollection->getSelect()->joinLeft(
             'customer_entity_int',
             sprintf(
                 'customer_entity_int.entity_id=main_table.customer_id and customer_entity_int.attribute_id=%d',
-                $attribute->getId()
+                $exceptsMarketingAttribute->getId()
             ),
             []
         );
-        $quoteCollection->getSelect()->where('customer_entity_int.value', '1');
+
+        $fields = ['customer_entity_int.value'];
+        $conditions = [['eq' => '1']];
+
+        if ($exceptsMarketingAttribute->getDefaultValue()) {
+            $fields[] = 'customer_entity_int.value';
+            $conditions[] = ['null' => null];
+        }
+
+        $quoteCollection->addFieldToFilter($fields, $conditions);
     }
 }
