@@ -51,9 +51,9 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
     /**
      * @param int $quoteLastActionDays
      * @param bool $isRespectAcceptsMarketing
+     * @param int|null $storeId
      * @param int $quoteLimit
      * @param bool $isResubmissionAllowed
-     * @param int|null $storeId
      * @return void
      * @throws \Magento\Framework\Exception\CouldNotSaveException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
@@ -61,9 +61,9 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
     public function reindex(
         $quoteLastActionDays = 1,
         $isRespectAcceptsMarketing = false,
+        $storeId = null,
         $quoteLimit = 0,
-        $isResubmissionAllowed = true,
-        $storeId = null
+        $isResubmissionAllowed = true
     ) {
         $quoteCollection = $this->quoteCollectionFactory->create();
         $this->prepareFingerprint($quoteCollection);

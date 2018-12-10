@@ -33,16 +33,16 @@ class Restore extends \Magento\Customer\Controller\AbstractAccount
 
     /**
      * @param \Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface $abandonmentRepository
-     * @param \Magento\Framework\Session\SessionManager $customerSession
-     * @param \Magento\Framework\Session\SessionManager $checkoutSession
+     * @param \Magento\Customer\Model\Session $customerSession
+     * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Magento\Quote\Api\CartRepositoryInterface $cartRepository
      * @param \Magento\Framework\App\Action\Context $context
      */
     public function __construct(
         \Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface $abandonmentRepository,
-        \Magento\Framework\Session\SessionManager $customerSession,
-        \Magento\Framework\Session\SessionManager $checkoutSession,
+        \Magento\Customer\Model\Session $customerSession,
+        \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Quote\Api\CartRepositoryInterface $cartRepository,
         \Magento\Framework\App\Action\Context $context
@@ -63,57 +63,117 @@ class Restore extends \Magento\Customer\Controller\AbstractAccount
     {
         $resultRedirect = $this->resultRedirectFactory->create();
 
-        $token = $this->getRequest()->getParam('token');
+        $token = $this->getRequest()
+            ->getParam('token');
 
         if (!$token) {
             return $resultRedirect->setPath('/');
         }
 
-        $abandonmentItem = $this->validateToken($token);
-        if (!$abandonmentItem) {
+        $abandonment = $this->isAbandonmentItemExist($token);
+        if (!$abandonment) {
             $this->messageManager
-                ->addNotice(__('Sorry, we were unable to restore the referenced shopping cart as it does not belong to this account.'));
+                ->addNoticeMessage(
+                    __('Sorry, we were unable to restore the referenced shopping cart as it does not belong to this account.')
+                );
             return $resultRedirect->setPath('checkout/cart');
         }
 
-        try {
-            /** @var \Magento\Quote\Api\Data\CartInterface $quote */
-            $quote = $this->cartRepository->get($abandonmentItem->getQuoteId());
-        } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+        $quote = $this->loadQuote($abandonment->getQuoteId());
+        if (!$quote) {
             $this->messageManager
-                ->addNotice(__('Sorry, we were unable to restore the referenced shopping cart as it does not belong to this account.'));
+                ->addNoticeMessage(
+                    __('Sorry, we were unable to restore the referenced shopping cart as it does not belong to this account.')
+                );
             return $resultRedirect->setPath('checkout/cart');
         }
 
-        if ($abandonmentItem->getCustomerId() != $this->customerSession->getCustomerId() ||
-            $abandonmentItem->getStoreId() != $this->storeManager->getStore()->getId() ||
-            $quote->getCustomer()->getId() != $this->customerSession->getCustomerId()
+        if (!$this->allowAbandonmentForCustomer($abandonment)
+            || !$this->allowForStore($abandonment)
+            || !$this->allowQuoteForCustomer($quote)
         ) {
             $this->messageManager
-                ->addNotice(__('Sorry, we were unable to restore the referenced shopping cart as it does not belong to this account.'));
+                ->addNoticeMessage(
+                    __('Sorry, we were unable to restore the referenced shopping cart as it does not belong to this account.')
+                );
             return $resultRedirect->setPath('checkout/cart');
         }
 
         $this->setupCurrentQuote($quote);
 
-        $this->messageManager->addSuccess(__('You shopping cart has been restored successfully.'));
+        $this->messageManager->addSuccessMessage(__('You shopping cart has been restored successfully.'));
 
         return $resultRedirect->setPath('checkout/cart');
     }
 
     /**
-     * @param string $token
-     * @return bool|\Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
+     * @param \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface $abandonmentItem
+     * @return bool
      */
-    private function validateToken($token)
+    private function allowAbandonmentForCustomer($abandonmentItem)
+    {
+        if ($abandonmentItem->getCustomerId() != $this->customerSession->getCustomerId()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface $abandonmentItem
+     * @return bool
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    private function allowForStore($abandonmentItem)
+    {
+        if ($abandonmentItem->getStoreId() != $this->storeManager->getStore()
+                ->getId()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param \Magento\Quote\Api\Data\CartInterface $quote
+     * @return bool
+     */
+    private function allowQuoteForCustomer($quote)
+    {
+        if ($quote->getCustomer()
+                ->getId() != $this->customerSession->getCustomerId()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param string $token
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface|null
+     */
+    private function isAbandonmentItemExist($token)
     {
         try {
             $item = $this->abandonmentRepository->getByFingerprint($token);
         } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
-            return false;
+            return null;
         }
 
         return $item;
+    }
+
+    /**
+     * @param int $quoteId
+     * @return \Magento\Quote\Api\Data\CartInterface|null
+     */
+    private function loadQuote($quoteId)
+    {
+        try {
+            /** @var \Magento\Quote\Api\Data\CartInterface $quote */
+            $quote = $this->cartRepository->get($quoteId);
+        } catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+            return null;
+        }
+
+        return $quote;
     }
 
     /**

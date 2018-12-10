@@ -26,7 +26,7 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
             $this->addCreatedAtField($setup);
         }
 
-        if (version_compare($context->getVersion(), '3.1.0', '<')) {
+        if (version_compare($context->getVersion(), '4.0.0', '<')) {
             $this->addFingerPrintCartAbandonment($setup);
             $this->dropFkKey($setup);
             $this->dropCartAbandonmentIndexes($setup);

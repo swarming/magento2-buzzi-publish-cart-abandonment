@@ -18,7 +18,7 @@ class UpgradeData implements UpgradeDataInterface
      */
     public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
-        if (version_compare($context->getVersion(), '3.2.0', '<')) {
+        if (version_compare($context->getVersion(), '4.0.0', '<')) {
             $this->setupFingerprint($setup);
         }
     }

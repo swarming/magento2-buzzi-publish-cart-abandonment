@@ -47,9 +47,9 @@ class DataBuilder
     protected $eventDispatcher;
 
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var UrlInterface
      */
-    private $storeManager;
+    private $urlBuilder;
 
     /**
      * @param \Buzzi\Publish\Helper\DataBuilder\Base $dataBuilderBase
@@ -59,6 +59,7 @@ class DataBuilder
      * @param \Magento\Customer\Model\CustomerRegistry $customerRegistry
      * @param \Magento\Quote\Api\CartRepositoryInterface $cartRepository
      * @param \Magento\Framework\Event\ManagerInterface $eventDispatcher
+     * @param \Magento\Framework\UrlInterface $urlBuilder
      */
     public function __construct(
         \Buzzi\Publish\Helper\DataBuilder\Base $dataBuilderBase,
@@ -68,7 +69,7 @@ class DataBuilder
         \Magento\Customer\Model\CustomerRegistry $customerRegistry,
         \Magento\Quote\Api\CartRepositoryInterface $cartRepository,
         \Magento\Framework\Event\ManagerInterface $eventDispatcher,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        \Magento\Framework\UrlInterface $urlBuilder
     ) {
         $this->dataBuilderBase = $dataBuilderBase;
         $this->dataBuilderCart = $dataBuilderCart;
@@ -77,7 +78,7 @@ class DataBuilder
         $this->customerRegistry = $customerRegistry;
         $this->cartRepository = $cartRepository;
         $this->eventDispatcher = $eventDispatcher;
-        $this->storeManager = $storeManager;
+        $this->urlBuilder = $urlBuilder;
     }
 
     /**
@@ -126,13 +127,12 @@ class DataBuilder
 
     /**
      * @param \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface $cartAbandonment
-     * @return mixed
+     * @return string
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    private function prepareStoreLink(
-        CartAbandonmentInterface $cartAbandonment
-    ) {
-        return $this->storeManager->getStore($cartAbandonment->getStoreId())
-            ->getUrl("cart_abandonment/quote/restore/", ['token' => $cartAbandonment->getFingerprint()]);
+    private function prepareStoreLink(CartAbandonmentInterface $cartAbandonment)
+    {
+        return $this->urlBuilder->setScope(['store_id' => $cartAbandonment->getStoreId()])
+            ->getUrl('cart_abandonment/quote/restore', ['token' => $cartAbandonment->getFingerprint()]);
     }
 }
