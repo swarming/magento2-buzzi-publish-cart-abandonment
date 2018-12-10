@@ -132,7 +132,7 @@ class DataBuilder
      */
     private function prepareStoreLink(CartAbandonmentInterface $cartAbandonment)
     {
-        return $this->urlBuilder->setScope(['store_id' => $cartAbandonment->getStoreId()])
+        return $this->urlBuilder->setScope($cartAbandonment->getStoreId())
             ->getUrl('cart_abandonment/quote/restore', ['token' => $cartAbandonment->getFingerprint()]);
     }
 }
