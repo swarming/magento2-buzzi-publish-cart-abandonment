@@ -13,6 +13,7 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
     const ABANDONMENT_ID = 'abandonment_id';
     const STORE_ID = 'store_id';
     const QUOTE_ID  = 'quote_id';
+    const FINGERPRINT ='fingerprint';
     const CUSTOMER_ID = 'customer_id';
     const STATUS = 'status';
     const ERROR_MESSAGE = 'error_message';
@@ -47,9 +48,20 @@ interface CartAbandonmentInterface extends \Magento\Framework\Api\ExtensibleData
     public function setQuoteId($quoteId);
 
     /**
+     * @param string $fingerprint
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
+     */
+    public function setFingerprint($fingerprint);
+
+    /**
      * @return int|null
      */
     public function getQuoteId();
+
+    /**
+     * @return string|null
+     */
+    public function getFingerprint();
 
     /**
      * @param int $customerId
