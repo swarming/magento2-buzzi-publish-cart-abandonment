@@ -116,16 +116,6 @@ class CartAbandonmentRepository implements \Buzzi\PublishCartAbandonment\Api\Car
     }
 
     /**
-     * @param int $quoteId
-     * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function getQuoteFingerprints($quoteId)
-    {
-        return $this->cartAbandonmentResource->getQuoteFingerprints($quoteId);
-    }
-
-    /**
      * @param string $fingerprint
      * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException

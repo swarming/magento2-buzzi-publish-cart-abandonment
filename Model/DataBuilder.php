@@ -2,6 +2,7 @@
 /**
  * Copyright © Swarming Technology, LLC. All rights reserved.
  */
+
 namespace Buzzi\PublishCartAbandonment\Model;
 
 use Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface;
@@ -47,7 +48,7 @@ class DataBuilder
     protected $eventDispatcher;
 
     /**
-     * @var UrlInterface
+     * @var \Magento\Framework\UrlInterface
      */
     private $urlBuilder;
 
@@ -128,11 +129,12 @@ class DataBuilder
     /**
      * @param \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface $cartAbandonment
      * @return string
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     private function prepareStoreLink(CartAbandonmentInterface $cartAbandonment)
     {
-        return $this->urlBuilder->setScope($cartAbandonment->getStoreId())
-            ->getUrl('cart_abandonment/quote/restore', ['token' => $cartAbandonment->getFingerprint()]);
+        return $this->urlBuilder->getUrl('cart_abandonment/quote/restore', [
+            'token' => $cartAbandonment->getFingerprint(),
+            '_scope' => $cartAbandonment->getStoreId()
+        ]);
     }
 }
