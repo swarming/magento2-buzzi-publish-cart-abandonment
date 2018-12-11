@@ -26,7 +26,7 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
             $this->addCreatedAtField($setup);
         }
 
-        if (version_compare($context->getVersion(), '4.0.0', '<')) {
+        if (version_compare($context->getVersion(), '3.1.0', '<')) {
             $this->addFingerPrintCartAbandonment($setup);
             $this->dropFkKey($setup);
             $this->dropCartAbandonmentIndexes($setup);
@@ -40,16 +40,15 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
      */
     private function addErrorMessageField(SchemaSetupInterface $setup)
     {
-        $setup->getConnection()
-            ->addColumn(
-                $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
-                CartAbandonmentInterface::ERROR_MESSAGE,
-                [
-                    'type' => Table::TYPE_TEXT,
-                    'nullable' => true,
-                    'comment' => 'Error Message'
-                ]
-            );
+        $setup->getConnection()->addColumn(
+            $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
+            CartAbandonmentInterface::ERROR_MESSAGE,
+            [
+                'type' => Table::TYPE_TEXT,
+                'nullable' => true,
+                'comment' => 'Error Message'
+            ]
+        );
     }
 
     /**
@@ -58,17 +57,16 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
      */
     private function addCreatedAtField(SchemaSetupInterface $setup)
     {
-        $setup->getConnection()
-            ->addColumn(
-                $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
-                CartAbandonmentInterface::CREATED_AT,
-                [
-                    'type' => Table::TYPE_TIMESTAMP,
-                    'nullable' => false,
-                    'default' => Table::TIMESTAMP_INIT,
-                    'comment' => 'Created At'
-                ]
-            );
+        $setup->getConnection()->addColumn(
+            $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
+            CartAbandonmentInterface::CREATED_AT,
+            [
+                'type' => Table::TYPE_TIMESTAMP,
+                'nullable' => false,
+                'default' => Table::TIMESTAMP_INIT,
+                'comment' => 'Created At'
+            ]
+        );
     }
 
     /**
@@ -77,35 +75,32 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
      */
     private function dropCartAbandonmentIndexes(SchemaSetupInterface $setup)
     {
-        $setup->getConnection()
-            ->dropIndex(
-                $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
-                $setup->getIdxName(
-                    ResourceModelCartAbandonment::TABLE_NAME,
-                    [CartAbandonmentInterface::STORE_ID],
-                    AdapterInterface::INDEX_TYPE_INDEX
-                )
-            );
+        $setup->getConnection()->dropIndex(
+            $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
+            $setup->getIdxName(
+                ResourceModelCartAbandonment::TABLE_NAME,
+                [CartAbandonmentInterface::STORE_ID],
+                AdapterInterface::INDEX_TYPE_INDEX
+            )
+        );
 
-        $setup->getConnection()
-            ->dropIndex(
-                $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
-                $setup->getIdxName(
-                    ResourceModelCartAbandonment::TABLE_NAME,
-                    [CartAbandonmentInterface::STATUS],
-                    AdapterInterface::INDEX_TYPE_INDEX
-                )
-            );
+        $setup->getConnection()->dropIndex(
+            $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
+            $setup->getIdxName(
+                ResourceModelCartAbandonment::TABLE_NAME,
+                [CartAbandonmentInterface::STATUS],
+                AdapterInterface::INDEX_TYPE_INDEX
+            )
+        );
 
-        $setup->getConnection()
-            ->dropIndex(
-                $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
-                $setup->getIdxName(
-                    ResourceModelCartAbandonment::TABLE_NAME,
-                    [CartAbandonmentInterface::QUOTE_ID],
-                    AdapterInterface::INDEX_TYPE_UNIQUE
-                )
-            );
+        $setup->getConnection()->dropIndex(
+            $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
+            $setup->getIdxName(
+                ResourceModelCartAbandonment::TABLE_NAME,
+                [CartAbandonmentInterface::QUOTE_ID],
+                AdapterInterface::INDEX_TYPE_UNIQUE
+            )
+        );
     }
 
     /**
@@ -114,16 +109,15 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
      */
     private function dropFkKey(SchemaSetupInterface $setup)
     {
-        $setup->getConnection()
-            ->dropForeignKey(
-                $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
-                $setup->getFkName(
-                    ResourceModelCartAbandonment::TABLE_NAME,
-                    CartAbandonmentInterface::QUOTE_ID,
-                    $setup->getTable('quote'),
-                    'entity_id'
-                )
-            );
+        $setup->getConnection()->dropForeignKey(
+            $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
+            $setup->getFkName(
+                ResourceModelCartAbandonment::TABLE_NAME,
+                CartAbandonmentInterface::QUOTE_ID,
+                $setup->getTable('quote'),
+                'entity_id'
+            )
+        );
     }
 
     /**
@@ -132,18 +126,17 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
      */
     private function addFingerPrintCartAbandonment(SchemaSetupInterface $setup)
     {
-        $setup->getConnection()
-            ->addColumn(
-                $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
-                CartAbandonmentInterface::FINGERPRINT,
-                [
-                    'type' => Table::TYPE_TEXT,
-                    'nullable' => false,
-                    'length' => 32,
-                    'comment' => 'Quote fingerprint md5 from quoteId, productIds with qty',
-                    'after' => CartAbandonmentInterface::QUOTE_ID
-                ]
-            );
+        $setup->getConnection()->addColumn(
+            $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
+            CartAbandonmentInterface::FINGERPRINT,
+            [
+                'type' => Table::TYPE_TEXT,
+                'nullable' => false,
+                'length' => 32,
+                'comment' => 'Quote fingerprint md5 from quoteId, productIds with qty',
+                'after' => CartAbandonmentInterface::QUOTE_ID
+            ]
+        );
     }
 
     /**
@@ -152,18 +145,16 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
      */
     private function addIndexFkKey(SchemaSetupInterface $setup)
     {
-        $setup->getConnection()
-            ->addIndex(
+        $setup->getConnection()->addIndex(
+            ResourceModelCartAbandonment::TABLE_NAME,
+            $setup->getIdxName(
                 ResourceModelCartAbandonment::TABLE_NAME,
-                $setup->getIdxName(
-                    ResourceModelCartAbandonment::TABLE_NAME,
-                    [CartAbandonmentInterface::FINGERPRINT],
-                    AdapterInterface::INDEX_TYPE_UNIQUE
-                ),
-                CartAbandonmentInterface::FINGERPRINT,
+                [CartAbandonmentInterface::FINGERPRINT],
                 AdapterInterface::INDEX_TYPE_UNIQUE
-            );
-
+            ),
+            CartAbandonmentInterface::FINGERPRINT,
+            AdapterInterface::INDEX_TYPE_UNIQUE
+        );
 
         $fkName = $setup->getFkName(
             ResourceModelCartAbandonment::TABLE_NAME,
@@ -172,14 +163,13 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
             'entity_id'
         );
 
-        $setup->getConnection()
-            ->addForeignKey(
-                $fkName,
-                ResourceModelCartAbandonment::TABLE_NAME,
-                CartAbandonmentInterface::QUOTE_ID,
-                $setup->getTable('quote'),
-                'entity_id',
-                Table::ACTION_CASCADE
-            );
+        $setup->getConnection()->addForeignKey(
+            $fkName,
+            ResourceModelCartAbandonment::TABLE_NAME,
+            CartAbandonmentInterface::QUOTE_ID,
+            $setup->getTable('quote'),
+            'entity_id',
+            Table::ACTION_CASCADE
+        );
     }
 }

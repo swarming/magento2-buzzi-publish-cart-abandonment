@@ -8,20 +8,20 @@ namespace Buzzi\PublishCartAbandonment\Controller\Quote;
 class Restore extends \Magento\Customer\Controller\AbstractAccount
 {
     /**
-     * @var \Buzzi\PublishCartAbandonment\Model\RestoreQuote
+     * @var \Buzzi\PublishCartAbandonment\Model\QuoteRestorer
      */
-    private $restoreQuote;
+    private $quoteRestorer;
 
     /**
-     * @param \Buzzi\PublishCartAbandonment\Model\RestoreQuote $restoreQuote
+     * @param \Buzzi\PublishCartAbandonment\Model\QuoteRestorer $quoteRestorer
      * @param \Magento\Framework\App\Action\Context $context
      */
     public function __construct(
-        \Buzzi\PublishCartAbandonment\Model\RestoreQuote $restoreQuote,
+        \Buzzi\PublishCartAbandonment\Model\QuoteRestorer $quoteRestorer,
         \Magento\Framework\App\Action\Context $context
     ) {
         parent::__construct($context);
-        $this->restoreQuote = $restoreQuote;
+        $this->quoteRestorer = $quoteRestorer;
     }
 
     /**
@@ -33,7 +33,7 @@ class Restore extends \Magento\Customer\Controller\AbstractAccount
         $token = $this->getRequest()->getParam('token');
 
         try {
-            $this->restoreQuote->restore($token);
+            $this->quoteRestorer->restore($token);
         } catch (\Magento\Framework\Exception\LocalizedException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
             return $resultRedirect->setPath('checkout/cart');

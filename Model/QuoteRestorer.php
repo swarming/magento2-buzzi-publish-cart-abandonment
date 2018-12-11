@@ -5,7 +5,7 @@
 
 namespace Buzzi\PublishCartAbandonment\Model;
 
-class RestoreQuote
+class QuoteRestorer
 {
     /**
      * @var \Magento\Customer\Model\Session
@@ -33,15 +33,15 @@ class RestoreQuote
     private $cartRepository;
 
     /**
-     * @param \Magento\Customer\Model\Session\Proxy $customerSession
-     * @param \Magento\Checkout\Model\Session\Proxy $checkoutSession
+     * @param \Magento\Customer\Model\Session $customerSession
+     * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface $abandonmentRepository
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Magento\Quote\Api\CartRepositoryInterface $cartRepository
      */
     public function __construct(
-        \Magento\Customer\Model\Session\Proxy $customerSession,
-        \Magento\Checkout\Model\Session\Proxy $checkoutSession,
+        \Magento\Customer\Model\Session $customerSession,
+        \Magento\Checkout\Model\Session $checkoutSession,
         \Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface $abandonmentRepository,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Quote\Api\CartRepositoryInterface $cartRepository
