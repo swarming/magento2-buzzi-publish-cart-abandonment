@@ -34,12 +34,13 @@ class Restore extends \Magento\Customer\Controller\AbstractAccount
 
         try {
             $this->quoteRestorer->restore($token);
+            $this->messageManager->addSuccessMessage(__('You shopping cart has been restored successfully.'));
         } catch (\Magento\Framework\Exception\LocalizedException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
-            return $resultRedirect->setPath('checkout/cart');
+        } catch (\Exception $e) {
+            $this->messageManager->addExceptionMessage($e, __('En error occurred while restoring the quote.'));
         }
 
-        $this->messageManager->addSuccessMessage(__('You shopping cart has been restored successfully.'));
         return $resultRedirect->setPath('checkout/cart');
     }
 }
