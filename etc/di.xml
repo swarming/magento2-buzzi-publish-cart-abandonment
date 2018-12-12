@@ -9,4 +9,10 @@
     <preference for="Buzzi\PublishCartAbandonment\Api\CartAbandonmentManagerInterface" type="Buzzi\PublishCartAbandonment\Service\CartAbandonmentManager" />
     <preference for="Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface" type="Buzzi\PublishCartAbandonment\Service\CartAbandonmentRepository" />
     <preference for="Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface" type="Buzzi\PublishCartAbandonment\Model\CartAbandonment" />
+    <type name="Buzzi\PublishCartAbandonment\Model\QuoteRestorer">
+        <arguments>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+            <argument name="checkoutSession" xsi:type="object">Magento\Checkout\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
 </config>

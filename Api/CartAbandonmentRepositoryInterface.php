@@ -51,4 +51,11 @@ interface CartAbandonmentRepositoryInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function deleteById($entityId);
+
+    /**
+     * @param string $fingerprint
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getByFingerprint($fingerprint);
 }

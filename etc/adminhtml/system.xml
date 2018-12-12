@@ -13,10 +13,18 @@
                     <comment>If set to Yes, event data will only be sent for customers where the ‘Accepts Marketing’ attribute is set to Yes.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-
                 <field id="quote_last_action" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
                     <label>Quote Last Action Timing</label>
                     <comment>The number of days, when a quote was updated last time.</comment>
+                </field>
+                <field id="quotes_limit" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Quotes Limit</label>
+                    <comment>Limit the number of abandoned carts sent per cron action. Leave 0 or empty for unlimited.</comment>
+                </field>
+                <field id="resubmission" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Cart Resubmission</label>
+                    <comment>Changes to cart items will trigger resubmission.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>
         </section>

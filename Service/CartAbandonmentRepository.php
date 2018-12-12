@@ -114,4 +114,21 @@ class CartAbandonmentRepository implements \Buzzi\PublishCartAbandonment\Api\Car
     {
         return $this->delete($this->getById($entityId));
     }
+
+    /**
+     * @param string $fingerprint
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getByFingerprint($fingerprint)
+    {
+        $cartAbandonment = $this->getNew();
+        $this->cartAbandonmentResource->load($cartAbandonment, $fingerprint, CartAbandonmentInterface::FINGERPRINT);
+        if (!$cartAbandonment->getAbandonmentId()) {
+            throw new NoSuchEntityException(
+                __('CartAbandonment with fingerprint "%1" does not exist.', $cartAbandonment)
+            );
+        }
+        return $cartAbandonment;
+    }
 }

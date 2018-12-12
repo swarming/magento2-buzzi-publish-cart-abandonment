@@ -26,6 +26,11 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
     private $cartAbandonmentRepository;
 
     /**
+     * @var \Buzzi\PublishCartAbandonment\Model\ResourceModel\CartAbandonment
+     */
+    private $cartAbandonmentResource;
+
+    /**
      * @var \Magento\Eav\Model\Config
      */
     private $eavConfig;
@@ -34,17 +39,20 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
      * @param \Magento\Customer\Model\Visitor $visitorModel
      * @param \Magento\Reports\Model\ResourceModel\Quote\CollectionFactory $quoteCollectionFactory
      * @param \Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface $cartAbandonmentRepository
-     * @param \Magento\Eav\Model\Config|null $eavConfig
+     * @param \Buzzi\PublishCartAbandonment\Model\ResourceModel\CartAbandonment $cartAbandonmentResource
+     * @param \Magento\Eav\Model\Config $eavConfig
      */
     public function __construct(
         \Magento\Customer\Model\Visitor $visitorModel,
         \Magento\Reports\Model\ResourceModel\Quote\CollectionFactory $quoteCollectionFactory,
         \Buzzi\PublishCartAbandonment\Api\CartAbandonmentRepositoryInterface $cartAbandonmentRepository,
+        \Buzzi\PublishCartAbandonment\Model\ResourceModel\CartAbandonment $cartAbandonmentResource,
         \Magento\Eav\Model\Config $eavConfig
     ) {
         $this->visitorModel = $visitorModel;
         $this->quoteCollectionFactory = $quoteCollectionFactory;
         $this->cartAbandonmentRepository = $cartAbandonmentRepository;
+        $this->cartAbandonmentResource = $cartAbandonmentResource;
         $this->eavConfig = $eavConfig;
     }
 
@@ -52,21 +60,42 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
      * @param int $quoteLastActionDays
      * @param bool $isRespectAcceptsMarketing
      * @param int|null $storeId
+     * @param int $quoteLimit
+     * @param bool $isResubmissionAllowed
      * @return void
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function reindex($quoteLastActionDays = 1, $isRespectAcceptsMarketing = false, $storeId = null)
-    {
+    public function reindex(
+        $quoteLastActionDays = 1,
+        $isRespectAcceptsMarketing = false,
+        $storeId = null,
+        $quoteLimit = 0,
+        $isResubmissionAllowed = true
+    ) {
         $quoteCollection = $this->quoteCollectionFactory->create();
+        $this->prepareFingerprint($quoteCollection);
         $this->prepareFilters($quoteCollection, $quoteLastActionDays, $isRespectAcceptsMarketing, $storeId);
+        $this->processQuoteLimit($quoteCollection, $quoteLimit);
 
         /** @var \Magento\Quote\Model\Quote $quote */
         foreach ($quoteCollection as $quote) {
             $cartAbandonment = $this->cartAbandonmentRepository->getByQuoteId($quote->getId(), true);
+
+            $quoteFingerprint = $quote->getData('fingerprint');
+            $fingerprints = $this->cartAbandonmentResource->getQuoteFingerprints($quote->getId());
+            if (!empty($fingerprints) && (!$isResubmissionAllowed || in_array($quoteFingerprint, $fingerprints))) {
+                continue;
+            }
+
             if ($cartAbandonment->getAbandonmentId() && $cartAbandonment->getCreatedAt() > $quote->getUpdatedAt()) {
                 continue;
             }
+
             $cartAbandonment->setStoreId($quote->getStoreId());
             $cartAbandonment->setQuoteId($quote->getId());
+            $cartAbandonment->setFingerprint($quoteFingerprint);
             $cartAbandonment->setCustomerId($quote->getCustomerId());
             $cartAbandonment->setStatus(CartAbandonmentInterface::STATUS_PENDING);
             $cartAbandonment->setErrorMessage('');
@@ -82,8 +111,12 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
      * @param int|null $storeId
      * @return void
      */
-    private function prepareFilters($quoteCollection, $quoteLastActionDays, $isRespectAcceptsMarketing = false, $storeId = null)
-    {
+    private function prepareFilters(
+        $quoteCollection,
+        $quoteLastActionDays,
+        $isRespectAcceptsMarketing = false,
+        $storeId = null
+    ) {
         $quoteCollection->prepareForAbandonedReport(null);
         $quoteCollection->addFieldToFilter(
             ['main_table.updated_at', 'main_table.updated_at'],
@@ -99,6 +132,36 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
 
         if ($isRespectAcceptsMarketing) {
             $this->filterNotAllowedCustomers($quoteCollection);
+        }
+    }
+
+    /**
+     * @param \Magento\Reports\Model\ResourceModel\Quote\Collection $quoteCollection
+     * @return void
+     */
+    private function prepareFingerprint($quoteCollection)
+    {
+        $expression = 'md5(CONCAT(main_table.entity_id, ' .
+            '(SELECT GROUP_CONCAT(sqi.product_id, sqi.qty ORDER BY sqi.product_id ASC) FROM quote_item as sqi ' .
+            'WHERE sqi.quote_id = main_table.entity_id GROUP BY sqi.quote_id)))';
+
+        $quoteCollection->getSelect()
+            ->columns(
+                [
+                    'fingerprint' => new \Zend_Db_Expr($expression)
+                ]
+            );
+    }
+
+    /**
+     * @param \Magento\Reports\Model\ResourceModel\Quote\Collection $quoteCollection
+     * @param int $quoteLimit
+     * @return void
+     */
+    private function processQuoteLimit($quoteCollection, $quoteLimit)
+    {
+        if ($quoteLimit > 0) {
+            $quoteCollection->getSelect()->limit($quoteLimit);
         }
     }
 
@@ -126,14 +189,15 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
     {
         $acceptsMarketingAttribute = $this->eavConfig->getAttribute(Customer::ENTITY, AcceptsMarketing::CUSTOMER_ATTR);
 
-        $quoteCollection->getSelect()->joinLeft(
-            'customer_entity_int',
-            sprintf(
-                'customer_entity_int.entity_id=main_table.customer_id and customer_entity_int.attribute_id=%d',
-                $acceptsMarketingAttribute->getId()
-            ),
-            []
-        );
+        $quoteCollection->getSelect()
+            ->joinLeft(
+                'customer_entity_int',
+                sprintf(
+                    'customer_entity_int.entity_id=main_table.customer_id and customer_entity_int.attribute_id=%d',
+                    $acceptsMarketingAttribute->getId()
+                ),
+                []
+            );
 
         $fields = ['customer_entity_int.value'];
         $conditions = [['eq' => '1']];

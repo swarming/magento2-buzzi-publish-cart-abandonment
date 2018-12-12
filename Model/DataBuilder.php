@@ -2,6 +2,7 @@
 /**
  * Copyright © Swarming Technology, LLC. All rights reserved.
  */
+
 namespace Buzzi\PublishCartAbandonment\Model;
 
 use Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface;
@@ -47,6 +48,11 @@ class DataBuilder
     protected $eventDispatcher;
 
     /**
+     * @var \Magento\Framework\UrlInterface
+     */
+    private $urlBuilder;
+
+    /**
      * @param \Buzzi\Publish\Helper\DataBuilder\Base $dataBuilderBase
      * @param \Buzzi\Publish\Helper\DataBuilder\Cart $dataBuilderCart
      * @param \Buzzi\Publish\Helper\DataBuilder\Customer $dataBuilderCustomer
@@ -54,6 +60,7 @@ class DataBuilder
      * @param \Magento\Customer\Model\CustomerRegistry $customerRegistry
      * @param \Magento\Quote\Api\CartRepositoryInterface $cartRepository
      * @param \Magento\Framework\Event\ManagerInterface $eventDispatcher
+     * @param \Magento\Framework\UrlInterface $urlBuilder
      */
     public function __construct(
         \Buzzi\Publish\Helper\DataBuilder\Base $dataBuilderBase,
@@ -62,7 +69,8 @@ class DataBuilder
         \Buzzi\Publish\Helper\DataBuilder\Address $dataBuilderAddress,
         \Magento\Customer\Model\CustomerRegistry $customerRegistry,
         \Magento\Quote\Api\CartRepositoryInterface $cartRepository,
-        \Magento\Framework\Event\ManagerInterface $eventDispatcher
+        \Magento\Framework\Event\ManagerInterface $eventDispatcher,
+        \Magento\Framework\UrlInterface $urlBuilder
     ) {
         $this->dataBuilderBase = $dataBuilderBase;
         $this->dataBuilderCart = $dataBuilderCart;
@@ -71,6 +79,7 @@ class DataBuilder
         $this->customerRegistry = $customerRegistry;
         $this->cartRepository = $cartRepository;
         $this->eventDispatcher = $eventDispatcher;
+        $this->urlBuilder = $urlBuilder;
     }
 
     /**
@@ -85,8 +94,9 @@ class DataBuilder
         $payload['customer'] = $this->getCustomerData($quote);
         $payload['cart'] = $this->dataBuilderCart->getCartData($quote);
         $payload['cart']['cart_items'] = $this->dataBuilderCart->getCartItemsData($quote);
+        $payload['cart']['checkout_url'] = $this->prepareStoreLink($cartAbandonment);
 
-        $billingAddress =  $this->dataBuilderAddress->getBillingAddressesFromQuote($quote);
+        $billingAddress = $this->dataBuilderAddress->getBillingAddressesFromQuote($quote);
         if ($billingAddress) {
             $payload['cart']['billing_address'] = $billingAddress;
         }
@@ -114,5 +124,17 @@ class DataBuilder
             $customerData = $this->dataBuilderCustomer->getCustomerData($customer);
         }
         return $customerData;
+    }
+
+    /**
+     * @param \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface $cartAbandonment
+     * @return string
+     */
+    private function prepareStoreLink(CartAbandonmentInterface $cartAbandonment)
+    {
+        return $this->urlBuilder->getUrl('cart_abandonment/quote/restore', [
+            'token' => $cartAbandonment->getFingerprint(),
+            '_scope' => $cartAbandonment->getStoreId()
+        ]);
     }
 }
