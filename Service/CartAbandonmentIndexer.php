@@ -81,18 +81,13 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
 
         /** @var \Magento\Quote\Model\Quote $quote */
         foreach ($quoteCollection as $quote) {
-            $cartAbandonment = $this->cartAbandonmentRepository->getByQuoteId($quote->getId(), true);
-
             $quoteFingerprint = $quote->getData('fingerprint');
             $fingerprints = $this->cartAbandonmentResource->getQuoteFingerprints($quote->getId());
             if (!empty($fingerprints) && (!$isResubmissionAllowed || in_array($quoteFingerprint, $fingerprints))) {
                 continue;
             }
 
-            if ($cartAbandonment->getAbandonmentId() && $cartAbandonment->getCreatedAt() > $quote->getUpdatedAt()) {
-                continue;
-            }
-
+            $cartAbandonment = $this->cartAbandonmentRepository->getNew();
             $cartAbandonment->setStoreId($quote->getStoreId());
             $cartAbandonment->setQuoteId($quote->getId());
             $cartAbandonment->setFingerprint($quoteFingerprint);
