@@ -21,6 +21,8 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
      */
     public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
+        $setup->startSetup();
+
         if (version_compare($context->getVersion(), '2.0.0', '<')) {
             $this->addErrorMessageField($setup);
             $this->addCreatedAtField($setup);
@@ -32,6 +34,12 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
             $this->setupFingerprintField($setup);
             $this->addQuoteForeignKey($setup);
         }
+
+        if (version_compare($context->getVersion(), '3.2.0', '<')) {
+            $this->addSequenceField($setup);
+        }
+
+        $setup->endSetup();
     }
 
     /**
@@ -176,6 +184,25 @@ class UpgradeSchema implements \Magento\Framework\Setup\UpgradeSchemaInterface
             $setup->getTable('quote'),
             'entity_id',
             Table::ACTION_CASCADE
+        );
+    }
+
+    /**
+     * @param \Magento\Framework\Setup\SchemaSetupInterface $setup
+     * @return void
+     */
+    private function addSequenceField(SchemaSetupInterface $setup)
+    {
+        $setup->getConnection()->addColumn(
+            $setup->getTable(ResourceModelCartAbandonment::TABLE_NAME),
+            CartAbandonmentInterface::SEQUENCE,
+            [
+                'type' => Table::TYPE_INTEGER,
+                'nullable' => false,
+                'default' => 0,
+                'comment' => 'Abandonment cart sequence number',
+                'after' => CartAbandonmentInterface::QUOTE_ID
+            ]
         );
     }
 }

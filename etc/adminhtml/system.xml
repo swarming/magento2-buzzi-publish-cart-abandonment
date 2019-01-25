@@ -26,6 +26,14 @@
                     <comment>Changes to cart items will trigger resubmission.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="resubmission_suffix" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Cart Resubmission Suffix</label>
+                    <comment>Append sequence number as suffix to cart ids of resubmitted carts.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="resubmission">1</field>
+                    </depends>
+                </field>
             </group>
         </section>
     </system>

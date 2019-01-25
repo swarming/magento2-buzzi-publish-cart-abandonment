@@ -91,6 +91,7 @@ class CartAbandonmentIndexer implements \Buzzi\PublishCartAbandonment\Api\CartAb
             $cartAbandonment->setStoreId($quote->getStoreId());
             $cartAbandonment->setQuoteId($quote->getId());
             $cartAbandonment->setFingerprint($quoteFingerprint);
+            $cartAbandonment->setSequence(count($fingerprints));
             $cartAbandonment->setCustomerId($quote->getCustomerId());
             $cartAbandonment->setStatus(CartAbandonmentInterface::STATUS_PENDING);
             $cartAbandonment->setErrorMessage('');

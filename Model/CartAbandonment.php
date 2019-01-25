@@ -69,6 +69,40 @@ class CartAbandonment extends \Magento\Framework\Model\AbstractExtensibleModel
     }
 
     /**
+     * @param string $fingerprint
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
+     */
+    public function setFingerprint($fingerprint)
+    {
+        return $this->setData(self::FINGERPRINT, $fingerprint);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFingerprint()
+    {
+        return $this->_getData(self::FINGERPRINT);
+    }
+
+    /**
+     * @param int $sequence
+     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
+     */
+    public function setSequence($sequence)
+    {
+        return $this->setData(self::SEQUENCE, $sequence);
+    }
+
+    /**
+     * @return int
+     */
+    public function getSequence()
+    {
+        return (int)$this->_getData(self::SEQUENCE);
+    }
+
+    /**
      * @param int $customerId
      * @return $this
      */
@@ -134,22 +168,5 @@ class CartAbandonment extends \Magento\Framework\Model\AbstractExtensibleModel
     public function getCreatedAt()
     {
         return $this->_getData(self::CREATED_AT);
-    }
-
-    /**
-     * @param string $fingerprint
-     * @return \Buzzi\PublishCartAbandonment\Api\Data\CartAbandonmentInterface
-     */
-    public function setFingerprint($fingerprint)
-    {
-        return $this->setData(self::FINGERPRINT, $fingerprint);
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getFingerprint()
-    {
-        return $this->_getData(self::FINGERPRINT);
     }
 }
