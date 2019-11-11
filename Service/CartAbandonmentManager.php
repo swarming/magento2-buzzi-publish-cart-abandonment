@@ -75,6 +75,9 @@ class CartAbandonmentManager implements \Buzzi\PublishCartAbandonment\Api\CartAb
             $payload = $this->dataBuilder->getPayload($cartAbandonment);
             $this->queue->send(DataBuilder::EVENT_TYPE, $payload, $cartAbandonment->getStoreId());
             $cartAbandonment->setStatus(CartAbandonmentInterface::STATUS_DONE);
+        } catch(\Error $e) {
+            $cartAbandonment->setStatus(CartAbandonmentInterface::STATUS_FAIL);
+            $cartAbandonment->setErrorMessage($e->getMessage());
         } catch (\Exception $e) {
             $cartAbandonment->setStatus(CartAbandonmentInterface::STATUS_FAIL);
             $cartAbandonment->setErrorMessage($e->getMessage());
